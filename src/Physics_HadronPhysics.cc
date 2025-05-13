@@ -66,12 +66,13 @@ Physics_HadronPhysics::~Physics_HadronPhysics()
 #include "G4TritonInelasticProcess.hh"
 #include "G4AlphaInelasticProcess.hh" 
 
+// TODO: Go through and fix each function using these
 // Low-energy Models: < 20GeV
-#include "G4LElastic.hh" 
+/*#include "G4LElastic.hh" 
 #include "G4LEPionPlusInelastic.hh"
 #include "G4LEPionMinusInelastic.hh" 
 #include "G4LEKaonPlusInelastic.hh"
-#include "G4LEKaonZeroSInelastic.hh" 
+#include "G4LEKaonZeroSInelastic.hh" //TODO: continue fixing functions from here on 
 #include "G4LEKaonZeroLInelastic.hh"
 #include "G4LEKaonMinusInelastic.hh" 
 #include "G4LEProtonInelastic.hh"
@@ -94,20 +95,35 @@ Physics_HadronPhysics::~Physics_HadronPhysics()
 #include "G4HENeutronInelastic.hh" 
 #include "G4HEAntiNeutronInelastic.hh"
 
+// Models:
+#include "G4HadronElastic.hh"
+#include "G4PionPlusInelastic.hh"
+#include "G4PionMinusInelastic.hh" 
+#include "G4KaonPlusInelastic.hh"
+#include "G4KaonZeroSInelastic.hh" 
+#include "G4KaonZeroLInelastic.hh"
+#include "G4KaonMinusInelastic.hh" 
+#include "G4ProtonInelastic.hh"
+#include "G4AntiProtonInelastic.hh" 
+#include "G4NeutronInelastic.hh"
+#include "G4AntiNeutronInelastic.hh" 
+#include "G4DeuteronInelastic.hh" 
+#include "G4TritonInelastic.hh"
+#include "G4AlphaInelastic.hh" 
+*/
 // Neutron high-precision models: <20 MeV
-#include "G4NeutronHPorLElastic.hh" 
+#include "G4NeutronHPElastic.hh" 
 #include "G4NeutronHPElasticData.hh"
 #include "GdNeutronHPCapture.hh"
 #include "G4NeutronHPCapture.hh"
 #include "G4NeutronHPCaptureData.hh"
-#include "G4NeutronHPorLEInelastic.hh" 
+#include "G4NeutronHPInelastic.hh" 
 #include "G4NeutronHPInelasticData.hh" 
-#include "G4LCapture.hh"
+#include "G4NeutronRadCapture.hh"
 
 // Stopping processes
-#include "G4PiMinusAbsorptionAtRest.hh" 
-#include "G4KaonMinusAbsorptionAtRest.hh"
-#include "G4AntiProtonAnnihilationAtRest.hh" 
+#include "G4HadronicAbsorptionBertini.hh" 
+#include "G4AntiProtonAbsorptionFritiof.hh" 
 #include "G4AntiNeutronAnnihilationAtRest.hh"
 
 #include "G4ProcessManager.hh"
@@ -182,7 +198,7 @@ void Physics_HadronPhysics::ConstructProcess()
 	///////////////////////////////////////////////
 {
 	G4HadronElasticProcess* theElasticProcess = new G4HadronElasticProcess;
-	G4LElastic* theElasticModel = new G4LElastic;   
+	G4HadronElastic* theElasticModel = new G4HadronElastic;   
 	theElasticProcess->RegisterMe(theElasticModel);
 	theParticleIterator->reset();
 	while ((*theParticleIterator)()) {
@@ -194,8 +210,8 @@ void Physics_HadronPhysics::ConstructProcess()
 			pmanager->AddDiscreteProcess(theElasticProcess);           
 			G4PionPlusInelasticProcess* theInelasticProcess =
 				new G4PionPlusInelasticProcess("inelastic"); 
-			G4LEPionPlusInelastic* theLEInelasticModel = 
-				new G4LEPionPlusInelastic;
+			G4PionPlusInelastic* theLEInelasticModel = 
+				new G4PionPlusInelastic;
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
 			G4HEPionPlusInelastic* theHEInelasticModel =
 				new G4HEPionPlusInelastic;
@@ -207,26 +223,26 @@ void Physics_HadronPhysics::ConstructProcess()
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4PionMinusInelasticProcess* theInelasticProcess =
 				new G4PionMinusInelasticProcess("inelastic");    
-			G4LEPionMinusInelastic* theLEInelasticModel =
-				new G4LEPionMinusInelastic;           
+			G4PionMinusInelastic* theLEInelasticModel =
+				new G4PionMinusInelastic;           
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
 			G4HEPionMinusInelastic* theHEInelasticModel = 
 				new G4HEPionMinusInelastic;
 			theInelasticProcess->RegisterMe(theHEInelasticModel);
 			pmanager->AddDiscreteProcess(theInelasticProcess);
 			G4String prcNam; 
-			pmanager->AddRestProcess(new G4PiMinusAbsorptionAtRest, ordDefault);
+			pmanager->AddRestProcess(new G4HadronicAbsorptionBertini, ordDefault);
 		} 
 
 		else if (particleName == "kaon+") {
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4KaonPlusInelasticProcess* theInelasticProcess =
 				new G4KaonPlusInelasticProcess("inelastic");
-			G4LEKaonPlusInelastic* theLEInelasticModel =
-				new G4LEKaonPlusInelastic;
+			G4KaonPlusInelastic* theLEInelasticModel =
+				new G4KaonPlusInelastic;
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEKaonPlusInelastic* theHEInelasticModel = 
-				new G4HEKaonPlusInelastic;
+			G4KaonPlusInelastic* theHEInelasticModel = 
+				new G4KaonPlusInelastic;
 			theInelasticProcess->RegisterMe(theHEInelasticModel); 
 			pmanager->AddDiscreteProcess(theInelasticProcess);
 		} 
@@ -268,7 +284,7 @@ void Physics_HadronPhysics::ConstructProcess()
 				new G4HEKaonMinusInelastic;
 			theInelasticProcess->RegisterMe(theHEInelasticModel); 
 			pmanager->AddDiscreteProcess(theInelasticProcess);
-			pmanager->AddRestProcess(new G4KaonMinusAbsorptionAtRest, ordDefault);
+			pmanager->AddRestProcess(new G4HadronicAbsorptionBertini, ordDefault);
 		}
 
 		else if (particleName == "proton") {
@@ -299,7 +315,7 @@ void Physics_HadronPhysics::ConstructProcess()
 			// elastic scattering
 			G4HadronElasticProcess* theNeutronElasticProcess =
 				new G4HadronElasticProcess;
-			G4NeutronHPorLElastic * theElasticNeutron = new G4NeutronHPorLElastic();
+			G4NeutronHPElastic * theElasticNeutron = new G4NeutronHPElastic();
 			theNeutronElasticProcess->RegisterMe(theElasticNeutron);
 			G4NeutronHPElasticData * theNeutronData = new G4NeutronHPElasticData();
 			theNeutronElasticProcess->AddDataSet(theNeutronData);
@@ -308,7 +324,7 @@ void Physics_HadronPhysics::ConstructProcess()
 			// inelastic scattering
 			G4NeutronInelasticProcess* theInelasticProcess = 
 				new G4NeutronInelasticProcess("inelastic");
-			G4NeutronHPorLEInelastic* theInelasticModel = new G4NeutronHPorLEInelastic();
+			G4NeutronHPInelastic* theInelasticModel = new G4NeutronHPInelastic();
 			theInelasticProcess->RegisterMe(theInelasticModel);
 			G4NeutronHPInelasticData * theNeutronData1 =
 				new G4NeutronHPInelasticData;
@@ -388,6 +404,7 @@ void Physics_HadronPhysics::ConstructProcess()
 	}
 }
 
+//TODO: I have not updated most of what is commented out below to geant4-10.1.3
 
 /*
    void Physics_HadronPhysics::ConstructProcess()
@@ -404,7 +421,7 @@ void Physics_HadronPhysics::ConstructProcess()
    }
 
    if ( particle == G4AntiProton::AntiProton() ) {
-   pmanager->AddRestProcess(new G4AntiProtonAnnihilationAtRest());
+   pmanager->AddRestProcess(new G4AntiProtonAbsorptionFritiof());
    }
 
    if ( particle == G4KaonMinus::KaonMinus() ) {
@@ -436,8 +453,8 @@ void Physics_HadronPhysics::ConstructProcess()
 
    G4HadronElasticProcess*   theHadronElasticProcess
    = new   G4HadronElasticProcess();
-   G4LElastic* theNeutronLElastic
-   = new   G4LElastic();
+   G4HadronElastic* theNeutronLElastic
+   = new   G4HadronElastic();
    if (omit_neutron_hp ) {
    theHadronElasticProcess->RegisterMe( theNeutronLElastic );
    }

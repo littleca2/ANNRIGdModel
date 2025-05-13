@@ -1,0 +1,19 @@
+13 May 2025 C.Little
+----------------------------------
+- Changed Physics_HadronPhysics.cc to replace G4PiMinusAbsorptionAtRest.hh and G4KaonMinusAbsorptionAtRest.hh with G4HadronicAbsorptionBertini.hh
+
+- Changed Physics_HadronPhysics.cc to replace G4AntiProtonAnnihilationAtRest.hh with G4AntiProtonAbsorptionFritiof.hh
+
+09 April 2025 C.Little
+----------------------------------
+- Changed Physics_HadronPhysics.cc to replace G4NeutronHPorLElastic.hh with G4NeutronHPElastic.hh; and replaced G4NeutronHPorLEInelastic.hh with G4NeutronHPInelastic.hh
+	G4HadronElastic.cc notes that the model may be used for all long-lived hadrons at all incident energies
+
+18 March 2025 C.Little
+----------------------------------
+- Changed Physics_HadronPhysics.cc to remove inclusions of low and high energy models since they're obsolete in Geant v10. Functions of these classes have not been updated/removed, yet.
+
+- Changed Physics_HadronPhysics.cc to replace G4LElastic.hh with G4HadronElastic.hh; and replaced G4LCapture.hh with G4NeutronRadCapture.hh. These changes were made in Geant4 in 2013 by Dennis Wright.
+
+- Changed Physics_MuonPhysics.cc to replace G4MuonMinusCaptureAtRest.hh (Obsolete) with G4MuonMinusCapture.hh
+
