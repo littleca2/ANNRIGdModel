@@ -11,6 +11,8 @@ G4PROFILE := true
 
 G4WORKDIR := .
 
+CPPFLAGS += -std=c++11
+
 .PHONY: all
 all: lib bin
 

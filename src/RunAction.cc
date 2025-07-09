@@ -16,6 +16,9 @@
 #include "TTree.h"
 #include "fstream"
 
+// Juan David Cortes, July 2, 2025, I'm doing this to see if IonTable() types will finally be filled with Gd
+#include "G4IonTable.hh"
+
 extern std::ofstream outf;
 extern G4String RECREATE_FILE_NAME;
 //////////////////////
@@ -65,6 +68,10 @@ delete tre;
 void RunAction::BeginOfRunAction(const G4Run*)
 	///////////////////////////////////////////////////
 {
+
+// Juan David Cortes, July 2, 2025, I'm doing this to see if IonTable() types will finally be filled with Gd
+G4IonTable::GetIonTable()->CreateAllIon();
+
 //	outf.open("test.dat");
 	tree-> Reset();
 tre->Reset();

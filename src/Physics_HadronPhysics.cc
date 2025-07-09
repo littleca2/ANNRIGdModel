@@ -67,47 +67,54 @@ Physics_HadronPhysics::~Physics_HadronPhysics()
 #include "G4AlphaInelasticProcess.hh" 
 
 // Low-energy Models: < 20GeV
-#include "G4LElastic.hh" 
-#include "G4LEPionPlusInelastic.hh"
-#include "G4LEPionMinusInelastic.hh" 
-#include "G4LEKaonPlusInelastic.hh"
-#include "G4LEKaonZeroSInelastic.hh" 
-#include "G4LEKaonZeroLInelastic.hh"
-#include "G4LEKaonMinusInelastic.hh" 
-#include "G4LEProtonInelastic.hh"
-#include "G4LEAntiProtonInelastic.hh" 
-#include "G4LENeutronInelastic.hh"
-#include "G4LEAntiNeutronInelastic.hh" 
-#include "G4LEDeuteronInelastic.hh" 
-#include "G4LETritonInelastic.hh"
-#include "G4LEAlphaInelastic.hh" 
+#include "G4HadronElastic.hh"
 
-// High-energy Models: >20 GeV 
-#include "G4HEPionPlusInelastic.hh"
-#include "G4HEPionMinusInelastic.hh" 
-#include "G4HEKaonPlusInelastic.hh"
-#include "G4HEKaonZeroInelastic.hh" 
-#include "G4HEKaonZeroInelastic.hh"
-#include "G4HEKaonMinusInelastic.hh" 
-#include "G4HEProtonInelastic.hh" 
-#include "G4HEAntiProtonInelastic.hh"
-#include "G4HENeutronInelastic.hh" 
-#include "G4HEAntiNeutronInelastic.hh"
+// Juan David Cortes, June 27, 2025, This should replace the previous low energy models for baryons and mesons (protons, neutrons, pions, kaons) 
+#include "G4CascadeInterface.hh"
+
+// Juan David Cortes, June 27, 2025, This should replace the previous low energy models for deuterons and light ions(deuterons, tritons and alphas)
+#include "G4BinaryLightIonReaction.hh"
+  
+
+
+// High-energy Models: >20 GeV
+
+// Juan David Cortes, June 30, 2025, It is necessary to include this in order to properly use "G4FTFModel.hh"
+#include "G4TheoFSGenerator.hh" 
+#include "G4LundStringFragmentation.hh"
+#include "G4ExcitedStringDecay.hh"
+#include "G4PreCompoundModel.hh"
+#include "G4GeneratorPrecompoundInterface.hh"
+
+// Juan David Cortes, June 27, 2025, This should replace the previous high energy models
+#include "G4FTFModel.hh"
+ 
 
 // Neutron high-precision models: <20 MeV
-#include "G4NeutronHPorLElastic.hh" 
+
+// Juan David Cortes, 27 June, 2025, To use instead of the "G4NeutronHPorLElastic.hh" file
+#include "G4NeutronHPElastic.hh"
+ 
 #include "G4NeutronHPElasticData.hh"
 #include "GdNeutronHPCapture.hh"
 #include "G4NeutronHPCapture.hh"
 #include "G4NeutronHPCaptureData.hh"
-#include "G4NeutronHPorLEInelastic.hh" 
-#include "G4NeutronHPInelasticData.hh" 
-#include "G4LCapture.hh"
+#include "G4NeutronHPInelasticData.hh"
+
+// Juan David Cortes, 30 June, 2025, For some reason, this wasn't included before:
+#include "G4NeutronHPInelastic.hh"
+
+
+// Juan David Cortes, 27 June, 2025, To use instead of the "G4LCapture.hh" file
+#include "G4NeutronHPCapture.hh" 
 
 // Stopping processes
-#include "G4PiMinusAbsorptionAtRest.hh" 
-#include "G4KaonMinusAbsorptionAtRest.hh"
-#include "G4AntiProtonAnnihilationAtRest.hh" 
+
+// Juan David Cortes, 27 June, 2025, To use instead of "G4PiMinusAbsorbtionAtRest.hh", "G4KaonMinusAbsorptionAtRest.hh"
+// I don't think that G4AntiProtonAnnihilationAtRest.hh" should be used
+#include "G4PiMinusAbsorptionBertini.hh"
+#include "G4KaonMinusAbsorptionBertini.hh"
+  
 #include "G4AntiNeutronAnnihilationAtRest.hh"
 
 #include "G4ProcessManager.hh"
@@ -181,8 +188,12 @@ void Physics_HadronPhysics::ConstructParticle()
 void Physics_HadronPhysics::ConstructProcess()
 	///////////////////////////////////////////////
 {
-	G4HadronElasticProcess* theElasticProcess = new G4HadronElasticProcess;
-	G4LElastic* theElasticModel = new G4LElastic;   
+
+	// Juan David Cortes, 27 June 2025, This should properly define theParticleIterator 
+	G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
+
+	G4HadronElasticProcess* theElasticProcess = new G4HadronElasticProcess();
+	G4HadronElastic* theElasticModel = new G4HadronElastic();   
 	theElasticProcess->RegisterMe(theElasticModel);
 	theParticleIterator->reset();
 	while ((*theParticleIterator)()) {
@@ -194,112 +205,273 @@ void Physics_HadronPhysics::ConstructProcess()
 			pmanager->AddDiscreteProcess(theElasticProcess);           
 			G4PionPlusInelasticProcess* theInelasticProcess =
 				new G4PionPlusInelasticProcess("inelastic"); 
-			G4LEPionPlusInelastic* theLEInelasticModel = 
-				new G4LEPionPlusInelastic;
-			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEPionPlusInelastic* theHEInelasticModel =
-				new G4HEPionPlusInelastic;
+			G4CascadeInterface* theLEInelasticModel =
+				new G4CascadeInterface();
+		        theInelasticProcess->RegisterMe(theLEInelasticModel);	
+
+
+			G4TheoFSGenerator * theHEInelasticModel = 
+				new G4TheoFSGenerator("FTFP");
+			G4FTFModel * theHEStringModel = 
+				new G4FTFModel();
+			G4LundStringFragmentation * theHELund = 
+				new G4LundStringFragmentation();
+			G4ExcitedStringDecay * theHEStringDecay = 
+				new G4ExcitedStringDecay(theHELund);
+			G4VPreCompoundModel * theHEDeExcitation = 
+				new G4PreCompoundModel();
+			G4GeneratorPrecompoundInterface * theHETransport = 
+				new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+			theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+			theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+			theHEInelasticModel->SetTransport(theHETransport);
+
 			theInelasticProcess->RegisterMe(theHEInelasticModel);
-			pmanager->AddDiscreteProcess(theInelasticProcess); 
+			pmanager->AddDiscreteProcess(theInelasticProcess);
+		
+ 
 		}
 
 		else if (particleName == "pi-") {
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4PionMinusInelasticProcess* theInelasticProcess =
 				new G4PionMinusInelasticProcess("inelastic");    
-			G4LEPionMinusInelastic* theLEInelasticModel =
-				new G4LEPionMinusInelastic;           
+			G4CascadeInterface* theLEInelasticModel =
+				new G4CascadeInterface();           
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEPionMinusInelastic* theHEInelasticModel = 
-				new G4HEPionMinusInelastic;
-			theInelasticProcess->RegisterMe(theHEInelasticModel);
-			pmanager->AddDiscreteProcess(theInelasticProcess);
+
+
+			G4TheoFSGenerator * theHEInelasticModel =
+				new G4TheoFSGenerator("FTFP");
+                        G4FTFModel * theHEStringModel =
+                                new G4FTFModel();
+                        G4LundStringFragmentation * theHELund =
+                                new G4LundStringFragmentation();
+                        G4ExcitedStringDecay * theHEStringDecay =
+                                new G4ExcitedStringDecay(theHELund);
+                        G4VPreCompoundModel * theHEDeExcitation =
+                                new G4PreCompoundModel();
+                        G4GeneratorPrecompoundInterface * theHETransport =
+                                new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+                        theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+                        theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+                        theHEInelasticModel->SetTransport(theHETransport);
+
+                        theInelasticProcess->RegisterMe(theHEInelasticModel);
+                        pmanager->AddDiscreteProcess(theInelasticProcess);
+
 			G4String prcNam; 
-			pmanager->AddRestProcess(new G4PiMinusAbsorptionAtRest, ordDefault);
+			pmanager->AddRestProcess(new G4PiMinusAbsorptionBertini(), ordDefault);
+
+
 		} 
 
 		else if (particleName == "kaon+") {
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4KaonPlusInelasticProcess* theInelasticProcess =
 				new G4KaonPlusInelasticProcess("inelastic");
-			G4LEKaonPlusInelastic* theLEInelasticModel =
-				new G4LEKaonPlusInelastic;
+			G4CascadeInterface* theLEInelasticModel =
+				new G4CascadeInterface();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEKaonPlusInelastic* theHEInelasticModel = 
-				new G4HEKaonPlusInelastic;
-			theInelasticProcess->RegisterMe(theHEInelasticModel); 
-			pmanager->AddDiscreteProcess(theInelasticProcess);
+
+			
+			G4TheoFSGenerator * theHEInelasticModel =
+				new G4TheoFSGenerator("FTFP");
+                        G4FTFModel * theHEStringModel =
+                                new G4FTFModel();
+                        G4LundStringFragmentation * theHELund =
+                                new G4LundStringFragmentation();
+                        G4ExcitedStringDecay * theHEStringDecay =
+                                new G4ExcitedStringDecay(theHELund);
+                        G4VPreCompoundModel * theHEDeExcitation =
+                                new G4PreCompoundModel();
+                        G4GeneratorPrecompoundInterface * theHETransport =
+                                new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+                        theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+                        theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+                        theHEInelasticModel->SetTransport(theHETransport);
+
+                        theInelasticProcess->RegisterMe(theHEInelasticModel);
+                        pmanager->AddDiscreteProcess(theInelasticProcess);
+
+
 		} 
 
 		else if (particleName == "kaon0S") {
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4KaonZeroSInelasticProcess* theInelasticProcess =  
 				new G4KaonZeroSInelasticProcess("inelastic");
-			G4LEKaonZeroSInelastic* theLEInelasticModel =
-				new G4LEKaonZeroSInelastic;
+			G4CascadeInterface* theLEInelasticModel =
+				new G4CascadeInterface();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);    
-			G4HEKaonZeroInelastic* theHEInelasticModel =
-				new G4HEKaonZeroInelastic;
-			theInelasticProcess->RegisterMe(theHEInelasticModel); 
-			pmanager->AddDiscreteProcess(theInelasticProcess);
+		
+
+			G4TheoFSGenerator * theHEInelasticModel =
+				new G4TheoFSGenerator("FTFP");
+                        G4FTFModel * theHEStringModel =
+                                new G4FTFModel();
+                        G4LundStringFragmentation * theHELund =
+                                new G4LundStringFragmentation();
+                        G4ExcitedStringDecay * theHEStringDecay =
+                                new G4ExcitedStringDecay(theHELund);
+                        G4VPreCompoundModel * theHEDeExcitation =
+                                new G4PreCompoundModel();
+                        G4GeneratorPrecompoundInterface * theHETransport =
+                                new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+                        theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+                        theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+                        theHEInelasticModel->SetTransport(theHETransport);
+
+                        theInelasticProcess->RegisterMe(theHEInelasticModel);
+                        pmanager->AddDiscreteProcess(theInelasticProcess);
+
+	
 		} 
 
 		else if (particleName == "kaon0L") {
 			pmanager->AddDiscreteProcess(theElasticProcess); 
 			G4KaonZeroLInelasticProcess* theInelasticProcess =
 				new G4KaonZeroLInelasticProcess("inelastic");
-			G4LEKaonZeroLInelastic* theLEInelasticModel =
-				new G4LEKaonZeroLInelastic;
+			G4CascadeInterface* theLEInelasticModel =
+				new G4CascadeInterface();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEKaonZeroInelastic* theHEInelasticModel =
-				new G4HEKaonZeroInelastic;
-			theInelasticProcess->RegisterMe(theHEInelasticModel);
-			pmanager->AddDiscreteProcess(theInelasticProcess);
+	
+
+			G4TheoFSGenerator * theHEInelasticModel =
+                                new G4TheoFSGenerator("FTFP");
+                        G4FTFModel * theHEStringModel =
+                                new G4FTFModel();
+                        G4LundStringFragmentation * theHELund =
+                                new G4LundStringFragmentation();
+                        G4ExcitedStringDecay * theHEStringDecay =
+                                new G4ExcitedStringDecay(theHELund);
+                        G4VPreCompoundModel * theHEDeExcitation =
+                                new G4PreCompoundModel();
+                        G4GeneratorPrecompoundInterface * theHETransport =
+                                new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+                        theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+                        theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+                        theHEInelasticModel->SetTransport(theHETransport);
+
+                        theInelasticProcess->RegisterMe(theHEInelasticModel);
+                        pmanager->AddDiscreteProcess(theInelasticProcess);
+
+	
 		} 
 
 		else if (particleName == "kaon-") {
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4KaonMinusInelasticProcess* theInelasticProcess =
 				new G4KaonMinusInelasticProcess("inelastic");
-			G4LEKaonMinusInelastic* theLEInelasticModel =
-				new G4LEKaonMinusInelastic;
+			G4CascadeInterface* theLEInelasticModel =
+				new G4CascadeInterface();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEKaonMinusInelastic* theHEInelasticModel =
-				new G4HEKaonMinusInelastic;
-			theInelasticProcess->RegisterMe(theHEInelasticModel); 
-			pmanager->AddDiscreteProcess(theInelasticProcess);
-			pmanager->AddRestProcess(new G4KaonMinusAbsorptionAtRest, ordDefault);
+	
+			
+			G4TheoFSGenerator * theHEInelasticModel =
+                                new G4TheoFSGenerator("FTFP");
+                        G4FTFModel * theHEStringModel =
+                                new G4FTFModel();
+                        G4LundStringFragmentation * theHELund =
+                                new G4LundStringFragmentation();
+                        G4ExcitedStringDecay * theHEStringDecay =
+                                new G4ExcitedStringDecay(theHELund);
+                        G4VPreCompoundModel * theHEDeExcitation =
+                                new G4PreCompoundModel();
+                        G4GeneratorPrecompoundInterface * theHETransport =
+                                new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+                        theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+                        theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+                        theHEInelasticModel->SetTransport(theHETransport);
+
+                        theInelasticProcess->RegisterMe(theHEInelasticModel);
+                        pmanager->AddDiscreteProcess(theInelasticProcess);
+	
+
+			pmanager->AddRestProcess(new G4KaonMinusAbsorptionBertini, ordDefault);
 		}
 
 		else if (particleName == "proton") {
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4ProtonInelasticProcess* theInelasticProcess =
 				new G4ProtonInelasticProcess("inelastic");
-			G4LEProtonInelastic* theLEInelasticModel = new G4LEProtonInelastic;
+			G4CascadeInterface* theLEInelasticModel = new G4CascadeInterface();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEProtonInelastic* theHEInelasticModel = new G4HEProtonInelastic;
-			theInelasticProcess->RegisterMe(theHEInelasticModel);
-			pmanager->AddDiscreteProcess(theInelasticProcess);
+
+
+			G4TheoFSGenerator * theHEInelasticModel =
+                                new G4TheoFSGenerator("FTFP");
+                        G4FTFModel * theHEStringModel =
+                                new G4FTFModel();
+                        G4LundStringFragmentation * theHELund =
+                                new G4LundStringFragmentation();
+                        G4ExcitedStringDecay * theHEStringDecay =
+                                new G4ExcitedStringDecay(theHELund);
+                        G4VPreCompoundModel * theHEDeExcitation =
+                                new G4PreCompoundModel();
+                        G4GeneratorPrecompoundInterface * theHETransport =
+                                new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+                        theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+                        theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+                        theHEInelasticModel->SetTransport(theHETransport);
+
+                        theInelasticProcess->RegisterMe(theHEInelasticModel);
+                        pmanager->AddDiscreteProcess(theInelasticProcess);
+
+
 		}
 
 		else if (particleName == "anti_proton") {
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4AntiProtonInelasticProcess* theInelasticProcess =
 				new G4AntiProtonInelasticProcess("inelastic");
-			G4LEAntiProtonInelastic* theLEInelasticModel = 
-				new G4LEAntiProtonInelastic;
+			G4CascadeInterface* theLEInelasticModel = 
+				new G4CascadeInterface();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEAntiProtonInelastic* theHEInelasticModel =
-				new G4HEAntiProtonInelastic;
-			theInelasticProcess->RegisterMe(theHEInelasticModel); 
-			pmanager->AddDiscreteProcess(theInelasticProcess);
+
+
+			G4TheoFSGenerator * theHEInelasticModel =
+                                new G4TheoFSGenerator("FTFP");
+                        G4FTFModel * theHEStringModel =
+                                new G4FTFModel();
+                        G4LundStringFragmentation * theHELund =
+                                new G4LundStringFragmentation();
+                        G4ExcitedStringDecay * theHEStringDecay =
+                                new G4ExcitedStringDecay(theHELund);
+                        G4VPreCompoundModel * theHEDeExcitation =
+                                new G4PreCompoundModel();
+                        G4GeneratorPrecompoundInterface * theHETransport =
+                                new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+                        theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+                        theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+                        theHEInelasticModel->SetTransport(theHETransport);
+
+                        theInelasticProcess->RegisterMe(theHEInelasticModel);
+                        pmanager->AddDiscreteProcess(theInelasticProcess);
+		
 		}
 
 		else if (particleName == "neutron") {
 			// elastic scattering
 			G4HadronElasticProcess* theNeutronElasticProcess =
 				new G4HadronElasticProcess;
-			G4NeutronHPorLElastic * theElasticNeutron = new G4NeutronHPorLElastic();
+			G4NeutronHPElastic * theElasticNeutron = new G4NeutronHPElastic();
 			theNeutronElasticProcess->RegisterMe(theElasticNeutron);
 			G4NeutronHPElasticData * theNeutronData = new G4NeutronHPElasticData();
 			theNeutronElasticProcess->AddDataSet(theNeutronData);
@@ -308,7 +480,7 @@ void Physics_HadronPhysics::ConstructProcess()
 			// inelastic scattering
 			G4NeutronInelasticProcess* theInelasticProcess = 
 				new G4NeutronInelasticProcess("inelastic");
-			G4NeutronHPorLEInelastic* theInelasticModel = new G4NeutronHPorLEInelastic();
+			G4NeutronHPInelastic* theInelasticModel = new G4NeutronHPInelastic();
 			theInelasticProcess->RegisterMe(theInelasticModel);
 			G4NeutronHPInelasticData * theNeutronData1 =
 				new G4NeutronHPInelasticData;
@@ -347,21 +519,41 @@ void Physics_HadronPhysics::ConstructProcess()
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4AntiNeutronInelasticProcess* theInelasticProcess =
 				new G4AntiNeutronInelasticProcess("inelastic");
-			G4LEAntiNeutronInelastic* theLEInelasticModel =
-				new G4LEAntiNeutronInelastic;
+			G4CascadeInterface* theLEInelasticModel =
+				new G4CascadeInterface();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
-			G4HEAntiNeutronInelastic* theHEInelasticModel =
-				new G4HEAntiNeutronInelastic;
-			theInelasticProcess->RegisterMe(theHEInelasticModel);
-			pmanager->AddDiscreteProcess(theInelasticProcess);
+
+
+			G4TheoFSGenerator * theHEInelasticModel =
+                                new G4TheoFSGenerator("FTFP");
+                        G4FTFModel * theHEStringModel =
+                                new G4FTFModel();
+                        G4LundStringFragmentation * theHELund =
+                                new G4LundStringFragmentation();
+                        G4ExcitedStringDecay * theHEStringDecay =
+                                new G4ExcitedStringDecay(theHELund);
+                        G4VPreCompoundModel * theHEDeExcitation =
+                                new G4PreCompoundModel();
+                        G4GeneratorPrecompoundInterface * theHETransport =
+                                new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+                        theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+                        theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+                        theHEInelasticModel->SetTransport(theHETransport);
+
+                        theInelasticProcess->RegisterMe(theHEInelasticModel);
+                        pmanager->AddDiscreteProcess(theInelasticProcess);
+
+		
 		}
 
 		else if (particleName == "deuteron") {
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4DeuteronInelasticProcess* theInelasticProcess =
 				new G4DeuteronInelasticProcess("inelastic");
-			G4LEDeuteronInelastic* theLEInelasticModel =
-				new G4LEDeuteronInelastic;
+			G4BinaryLightIonReaction* theLEInelasticModel =
+				new G4BinaryLightIonReaction();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
 			pmanager->AddDiscreteProcess(theInelasticProcess);
 		}
@@ -370,8 +562,8 @@ void Physics_HadronPhysics::ConstructProcess()
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4TritonInelasticProcess* theInelasticProcess =
 				new G4TritonInelasticProcess("inelastic");
-			G4LETritonInelastic* theLEInelasticModel =
-				new G4LETritonInelastic;
+			G4BinaryLightIonReaction* theLEInelasticModel =
+				new G4BinaryLightIonReaction();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
 			pmanager->AddDiscreteProcess(theInelasticProcess);
 		}
@@ -380,8 +572,8 @@ void Physics_HadronPhysics::ConstructProcess()
 			pmanager->AddDiscreteProcess(theElasticProcess);
 			G4AlphaInelasticProcess* theInelasticProcess =
 				new G4AlphaInelasticProcess("inelastic");
-			G4LEAlphaInelastic* theLEInelasticModel =
-				new G4LEAlphaInelastic;
+			G4BinaryLightIonReaction* theLEInelasticModel =
+				new G4BinaryLightIonReaction();
 			theInelasticProcess->RegisterMe(theLEInelasticModel);
 			pmanager->AddDiscreteProcess(theInelasticProcess);
 		}

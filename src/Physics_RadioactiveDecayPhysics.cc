@@ -69,7 +69,12 @@ void Physics_RadioactiveDecayPhysics::ConstructProcess()
   G4RadioactiveDecayPhysics* theRadioactiveDecayProcess = new G4RadioactiveDecayPhysics(); // -0316
   theRadioactiveDecayProcess->ConstructProcess(); // -0316
   // Add Decay Process
-  G4Decay* theDecayProcess = new G4Decay();   theParticleIterator->reset();
+  G4Decay* theDecayProcess = new G4Decay();  
+
+  G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
+
+  theParticleIterator->reset();
+
   while( (*theParticleIterator)() ){     
     G4ParticleDefinition* particle = theParticleIterator->value();
     G4ProcessManager* pmanager = particle->GetProcessManager();     

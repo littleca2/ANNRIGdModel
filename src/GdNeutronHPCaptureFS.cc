@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 //                   Spectrum of radiative neutron capture by Gadolinium           
 //                                    version 1.0.0                                
 //                                    (Sep.09.2005)                               
@@ -22,6 +22,42 @@
 #include "ANNRIGd_GdNCaptureGammaGenerator.hh"
 #include "ANNRIGd_GeneratorConfigurator.hh"
 #include "ANNRIGd_OutputConverter.hh"
+
+#include "G4SystemOfUnits.hh"
+
+// Juan David Cortes, June 30, 2025, This might solve the theResult problem:
+
+#include "G4Cache.hh"
+
+
+// Juan David Cortes, June 30, 2025, Because FindIon() was moved
+#include "G4IonTable.hh"
+
+// Juan David Cortes, July 2, 2025, This will, hopefully, get Gd into the IonTables
+#include "G4NuclideTable.hh"
+
+// Juan David Cortes, July 7, 2025, Just for the sake of knowing the current MC iteration
+
+#include <cmath>
+int eventCount = 0;
+int totalEventNum = 200000000;
+double percentProgress = 0.0;
+double eventsPerSecond = log(static_cast<double>(totalEventNum) / 1.1547) / 2.2163;
+double elapsedTime = 0.0;
+double totalTime = static_cast<double>(totalEventNum) / eventsPerSecond; // In Seconds 
+double remainingTime = totalTime; // Also in seconds
+int daysElapsed = 0;
+int daysRemaining = 0;
+int hoursElapsed = 0;
+int hoursRemaining = 0;
+int minutesElapsed = 0;
+int minutesRemaining = 0;
+int secondsElapsed = 0;
+int secondsRemaining = 0;
+int numSecondsPerDay = 86400;
+int numSecondsPerHour = 3600;
+int numSecondsPerMinute = 60;
+
 namespace AGd = ANNRIGdGammaSpecModel;
 
 #define File_Name "GdNeutronHPCaptireFS.cc"
@@ -54,17 +90,31 @@ G4HadFinalState * GdNeutronHPCaptureFS::ApplyYourself(const G4HadProjectile & th
 ///////////////////////////////////////////////////////////////////////////////////////
 {
 	G4int i;
-	theResult.Clear();
+
+	// Juan David Cortes, June 30, 2025, It is necessary to get the cache and then clear it. This will also prove radically important when dealing
+	// with AddSecondary(), as you will see below
+	auto * theFinalState = theResult.Get();
+
+	if (!theFinalState) {
+		theResult.Put(new G4HadFinalState);
+		theFinalState = theResult.Get();		
+		theFinalState->Clear();
+		cout << "theFinalState was null" << endl;
+	}
 
 	////////////////prepare neutron//////////////////////
 	G4double eKinetic = theTrack.GetKineticEnergy();
 	const G4HadProjectile *incidentParticle = &theTrack;
 	//theNeutron = const_cast<G4ParticleDefinition *>(incidentParticle->GetDefinition()) ;
-	G4ReactionProduct theNeutron( const_cast<G4ParticleDefinition *>(incidentParticle->GetDefinition()) );
+	// Juan David Cortes, June 30, 2025,  G4ReactionProduct theNeutron( const_cast<G4ParticleDefinition *>(incidentParticle->GetDefinition()) );
+	// Juan David Cortes, June 30, 2025, I think that it would just be better to work with the this* variables instead of just shadowing (I don't see any
+	// benefit to shadowing in this very specific case)
+	auto theNeutron = G4ReactionProduct( const_cast<G4ParticleDefinition *>(incidentParticle->GetDefinition()) );
 	theNeutron.SetMomentum( incidentParticle->Get4Momentum().vect() );
 	theNeutron.SetKineticEnergy( eKinetic );
 
 	/////////////////prepare target////////////////////
+	// Juan David Cortes, June 30, 2025, Again, because I don't think that shadowing should be necessary in this case
 	G4ReactionProduct theTarget; 
 	G4Nucleus aNucleus;
 	G4double eps = 0.0001;
@@ -107,8 +157,50 @@ G4HadFinalState * GdNeutronHPCaptureFS::ApplyYourself(const G4HadProjectile & th
 		UpdateNucleus(theOne,thePhotons->operator[](i)->GetTotalEnergy());
 	}
 	theTwo = new G4DynamicParticle;
-	theTwo->SetDefinition(G4ParticleTable::GetParticleTable()
-			->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ)));
+
+	// Juan David Cortes, June 30, 2025, I consider that this is necessary in order to properly use the FindIon() function
+	// theTwo->SetDefinition(G4ParticleTable::GetParticleTable()->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ)));
+	G4ParticleTable* theTable1 = G4ParticleTable::GetParticleTable();
+	G4IonTable* tableOfIons1 = theTable1->GetIonTable();
+	tableOfIons1->CreateAllIon();
+	//cout << "Number of Ions in tableOfIons1: " << tableOfIons1->Entries() << endl;
+	//theTwo->SetDefinition(tableOfIons1->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ)));
+
+	auto* tempIonTheTwo = tableOfIons1->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0);
+
+
+	//cout << "Ions in tableOfIons1" << endl;
+	G4int ionsInTableOfIons1 = tableOfIons1->Entries();
+	for (G4int n = 0; n < ionsInTableOfIons1; ++n) {
+		G4ParticleDefinition* ion = tableOfIons1->GetParticle(n);
+		G4int Z  = ion->GetAtomicNumber();
+		G4double A = ion->GetAtomicMass();
+		//cout << ion->GetParticleName() << "  Z=" << Z << "  A=" << A << endl;
+	}
+
+	//cout << "For tempIonTheTwo: "<< "Z = " << static_cast<G4int>(theBaseZ) << "A = " << static_cast<G4int>(theBaseA+1) << endl;
+
+
+	if (!tempIonTheTwo) {
+
+		cout << "tempIonTheTwo is null" << endl;
+
+	}
+
+	theTwo->SetDefinition(tempIonTheTwo);
+
+
+	//if (tempIonTheTwo) {
+
+		//theTwo->SetDefinition(tempIonTheTwo);
+
+	//}
+
+	//cout << "tempIonTheTwo is null" << endl;
+
+
+	//theTwo->SetDefinition(tableOfIons1->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0));
+
 	theTwo->SetMomentum(nucleus->GetMomentum());
 
 	/////////////add them to the final state///////////////
@@ -123,8 +215,17 @@ G4HadFinalState * GdNeutronHPCaptureFS::ApplyYourself(const G4HadProjectile & th
 	//////////////Recoil, if only one gamma//////////////
 	if (1==nPhotons){
 		G4DynamicParticle * theOne = new G4DynamicParticle;
-		G4ParticleDefinition * aRecoil = G4ParticleTable::GetParticleTable()
-			->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ));
+
+		// Juan David Cortes, June 30, 2025, I consider that this is necessary in order to properly use the FindIon() function
+		// G4ParticleDefinition * aRecoil = G4ParticleTable::GetParticleTable()->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ));
+		G4ParticleTable* theTable2 = G4ParticleTable::GetParticleTable();
+		G4IonTable* tableOfIons2 = theTable2->GetIonTable();
+
+		//cout << "Number of Ions in tableOfIons2: " << tableOfIons2->Entries() << endl;
+		//G4ParticleDefinition * aRecoil = tableOfIons2->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ));
+
+		G4ParticleDefinition * aRecoil = tableOfIons2->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0);
+
 		theOne->SetDefinition(aRecoil);
 		// Now energy; 
 		// Can be done slightly better @
@@ -140,7 +241,9 @@ G4HadFinalState * GdNeutronHPCaptureFS::ApplyYourself(const G4HadProjectile & th
 		G4double theAbsMom = std::sqrt(theResE*theResE - theResMass*theResMass);
 		G4ThreeVector theMomentum = theAbsMom*theMomUnit;
 		theOne->SetMomentum(theMomentum);
-		theResult.AddSecondary(theOne);
+
+		// Juan David Cortes, June 30, 2025, theFinalState is used instead of theResult		
+		theFinalState->AddSecondary(theOne);
 	}
 
 	//////////////Now fill in the gammas.////////////////////
@@ -150,17 +253,51 @@ G4HadFinalState * GdNeutronHPCaptureFS::ApplyYourself(const G4HadProjectile & th
 		theOne->SetDefinition(thePhotons->operator[](i)->GetDefinition());
 		theOne->SetMomentum(thePhotons->operator[](i)->GetMomentum());
 		// G4cout << "PID: gamma is generated by Gd. The momentum is:" << thePhotons->operator[](i)->GetMomentum() << G4endl;//Added by Yano, to see the function working correctly.
-		theResult.AddSecondary(theOne);
+
+		// Juan David Cortes, June 30, 2025, theFinalState is used instead of theResult		
+		theFinalState->AddSecondary(theOne);
 		delete thePhotons->operator[](i);
 	}
 	delete thePhotons; 
 
+	// Juan David Cortes, June 30, 2025, Again, theFinalState is used instead of theResult
 	///////////////ADD deexcited nucleus////////////////////
-	theResult.AddSecondary(theTwo);
+	theFinalState->AddSecondary(theTwo);
+
+
+
+
+	// Juan David Cortes, July 7, 2025, Just for the sake of knowing our current iteration
+	eventCount = eventCount + 1;
+	elapsedTime = static_cast<double>(eventCount) / eventsPerSecond;
+
+	// Juan David Cortes, July 7, 2025, This should legibly express elapsedTime in days, hours, minutes and seconds 
+	daysElapsed = elapsedTime / numSecondsPerDay;
+	hoursElapsed = (static_cast<int>(elapsedTime) % numSecondsPerDay) / numSecondsPerHour;
+	minutesElapsed = (static_cast<int>(elapsedTime) % numSecondsPerHour) / numSecondsPerMinute;
+	secondsElapsed = static_cast<int>(elapsedTime) % numSecondsPerMinute;
+
+
+	remainingTime = totalTime - elapsedTime; 
+
+	// Juan David Cortes, July 7, 2025, This should legibly express remainingTime in days, hours, minutes and seconds 
+	daysRemaining = remainingTime / numSecondsPerDay;
+	hoursRemaining = (static_cast<int>(remainingTime) % numSecondsPerDay) / numSecondsPerHour;
+	minutesRemaining = (static_cast<int>(remainingTime) % numSecondsPerHour) / numSecondsPerMinute;
+	secondsRemaining = static_cast<int>(remainingTime) % numSecondsPerMinute; 
+
+
+	percentProgress = (static_cast<double>(eventCount) / static_cast<double>(totalEventNum)) * 100.0;
+	cout << "Event number " <<  eventCount << " of " << totalEventNum << endl;
+	cout << "Estimated Elapsed time: " << daysElapsed << " days, " << hoursElapsed << " hours, " << minutesElapsed << " minutes, " << secondsElapsed <<  " seconds" << endl;
+	cout << "Estimated Time Remaining: " << daysRemaining << " days, " << hoursRemaining << " hours, " << minutesRemaining << " minutes, " << secondsRemaining <<  " seconds" << endl;
+	cout << "Current Progress: " << percentProgress << "%" << endl << endl << endl;
+
+
 
 	/////////////clean up the primary neutron///////////////
-	theResult.SetStatusChange(stopAndKill);
-	return &theResult;
+	theFinalState->SetStatusChange(stopAndKill);
+	return theFinalState;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -175,14 +312,63 @@ void GdNeutronHPCaptureFS::UpdateNucleus( const G4Fragment* gamma , G4double eGa
 
 	G4ParticleTable* theTable = G4ParticleTable::GetParticleTable();
 
-	G4double m1 = theTable->FindIon(static_cast<G4int>(nucleus->GetZ()), static_cast<G4int>(nucleus->GetA()), 0, static_cast<G4int>(nucleus->GetZ())) ->GetPDGMass();
+	// Juan David Cortes, June 30, 2025, Again, I will adjust this code for it to work with the appropriate FindIon()
+	G4IonTable* tableOfIons = theTable->GetIonTable();
+
+	tableOfIons->CreateAllIon();
+
+	auto* nuclideTable = G4NuclideTable::GetNuclideTable();
+	nuclideTable->SetThresholdOfHalfLife(0.0);
+	nuclideTable->GenerateNuclide();
+	size_t nIso = nuclideTable->entries();
+	//cout << "Number of Isotopes in nuclideTable: " << nIso << endl;
+	for (size_t k = 0; k < nIso; ++k) {
+		auto* prop = nuclideTable->GetIsotopeByIndex(k);
+		tableOfIons->GetIon(prop->GetAtomicNumber(), prop->GetAtomicMass(), prop->GetIsomerLevel());
+	}
+
+	//cout << "Number of Ions in tableOfIons: " << tableOfIons->Entries() << endl;
+
+	// Juan David Cortes, June 30, 2025, Since the definition of m2 below shadows the defintion of meters squared in G4SystemOfUnits, I will rename m1 and m2 to tempMass1 and tempMass2 in order to avoid
+	// any shadowing and maintain the same naming scheme
+	//G4double tempMass1 = tableOfIons->FindIon(static_cast<G4int>(nucleus->GetZ()), static_cast<G4int>(nucleus->GetA()), 0, static_cast<G4int>(nucleus->GetZ())) ->GetPDGMass();
+
+//G4double tempMass1 = tableOfIons->FindIon(static_cast<G4int>(nucleus->GetZ()), static_cast<G4int>(nucleus->GetA())) ->GetPDGMass();
+
+	auto* tempIon1 = tableOfIons->FindIon(static_cast<G4int>(nucleus->GetZ()), static_cast<G4int>(nucleus->GetA()), 0);
+	//cout << "Ions in tableOfIons" << endl;
+
+	
+	G4int ionsInTableOfIons = tableOfIons->Entries();
+	for (G4int j = 0; j < ionsInTableOfIons; ++j) {
+		G4ParticleDefinition* ion = tableOfIons->GetParticle(j);
+		G4int Z  = ion->GetAtomicNumber();
+		G4double A = ion->GetAtomicMass();
+		//cout << ion->GetParticleName() << "  Z=" << Z << "  A=" << A << endl;
+	}
+
+	//cout << "For tempIon1: " << "Z = " << static_cast<G4int>(nucleus->GetZ()) << "A = " << static_cast<G4int>(nucleus->GetA()) << endl;
+
+
+	G4double tempMass1 = 0.0;
+
+	if (!tempIon1) {
+		cout << "tempIon1 is null" << endl;
+	}
+
+	tempMass1 = tempIon1->GetPDGMass();
+
+	//if (tempIon1) {
+		//tempMass1 = tempIon1->GetPDGMass();
+	//}
+	//cout << "tempIon1 is null" << endl;
 
 	//G4double m1 = G4ParticleTable::GetParticleTable()->GetIonTable()->GetIonMass(static_cast<G4int>(nucleus->GetZ()),
 	//static_cast<G4int>(nucleus->GetA()));
-	G4double m2 = nucleus->GetZ() *  G4Proton::Proton()->GetPDGMass() + 
+	G4double tempMass2 = nucleus->GetZ() *  G4Proton::Proton()->GetPDGMass() + 
 		(nucleus->GetA()- nucleus->GetZ())*G4Neutron::Neutron()->GetPDGMass();
 
-	G4double Mass = std::min(m1,m2);
+	G4double Mass = std::min(tempMass1,tempMass2);
 
 	G4double newExcitation = p4Nucleus.mag() - Mass - eGamma;
 

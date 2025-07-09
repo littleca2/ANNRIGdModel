@@ -19,6 +19,11 @@
 #include "Randomize.hh"
 #include <vector>
 #include "G4Gamma.hh"
+#include "G4SystemOfUnits.hh"
+
+// Juan David Cortes, June 27, 2025, this should solve the twopi and pi issue
+
+#include "G4PhysicalConstants.hh"
 
 #define File_name "GdCaptureGammas_glg4sim.cc"
 extern G4int Gd_CAPTURE;
@@ -29,6 +34,7 @@ GdCaptureGammas_glg4sim::GdCaptureGammas_glg4sim () {
 }
 
 GdCaptureGammas_glg4sim::~GdCaptureGammas_glg4sim () {}
+
 
 G4ReactionProductVector *  GdCaptureGammas_glg4sim::GetGammas () 
 {

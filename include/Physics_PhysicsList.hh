@@ -30,6 +30,8 @@
 #include "G4VModularPhysicsList.hh"
 #include "globals.hh"
 
+
+
 class Physics_PhysicsList: public G4VModularPhysicsList
 {
 public:
@@ -37,6 +39,8 @@ public:
   virtual ~Physics_PhysicsList();
 
 public:
+  // Juan David Cortes, July 2, 2025, Doing this to see if it is possible for IonTable to get Gd
+  virtual void ConstructParticle() override;
   // SetCuts() 
   virtual void SetCuts();
 

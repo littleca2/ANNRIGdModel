@@ -64,6 +64,9 @@ void Physics_GeneralPhysics::ConstructProcess()
   fDecayProcess = new G4Decay();
 
   // Add Decay Process
+
+  G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
+
   theParticleIterator->reset();
   while( (*theParticleIterator)() ){
     G4ParticleDefinition* particle = theParticleIterator->value();
