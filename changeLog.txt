@@ -1,0 +1,242 @@
+hange Log
+Juan David Cortes Echeverria
+
+I have divided the changes by file in order to, hopefully, ensure a better legibility
+
+
+
+GNUmakefile:
+
+- Added CPPFLAGS += -std=c++11 near the top
+
+
+
+
+Physics_MuonPhysics.hh:
+
+- Replaced “G4MuonMinusCaptureAtRest.hh” with “G4MuonMinusCapture.hh”
+
+
+
+
+Physics_HadronPhysics.cc:
+
+- Replaced “G4LElastic.hh” with “G4HadronElastic.hh”
+
+- Replaced the previous low energy models for protons, neutrons, pions, kaons (i.e. "G4LEPionPlusInelastic.hh", "G4LEPionMinusInelastic.hh", "G4LEKaonPlusInelastic.hh", "G4LEKaonZeroSInelastic.hh", "G4LEKaonZeroLInelastic.hh", "G4LEKaonMinusInelastic.hh", "G4LEProtonInelastic.hh", "G4LEAntiProtonInelastic.hh", "G4LENeutronInelastic.hh", "G4LEAntiNeutronInelastic.hh") with "G4CascadeInterface.hh"
+
+- Replaced the previous low energy models for deuterons, tritons and alphas (i.e. "G4LEDeuteronInelastic.hh", "G4LETritonInelastic.hh", "G4LEAlphaInelastic.hh") with "G4BinaryLightIonReaction.hh"
+
+- Replaced the previous high energy models (i.e. "G4HEPionPlusInelastic.hh" , "G4HEPionMinusInelastic.hh", "G4HEKaonPlusInelastic.hh", "G4HEKaonZeroInelastic.hh", "G4HEKaonZeroInelastic.hh", "G4HEKaonMinusInelastic.hh", "G4HEProtonInelastic.hh", "G4HEAntiProtonInelastic.hh", "G4HENeutronInelastic.hh", "G4HEAntiNeutronInelastic.hh") with “G4FTFModel.hh”
+
+- Replaced "G4LCapture.hh" with "G4NeutronHPCapture.hh"
+
+- Replaced "G4PiMinusAbsorbtionAtRest.hh" with "G4PiMinusAbsorptionBertini.hh"
+
+- Replaced "G4KaonMinusAbsorptionAtRest.hh" with "G4KaonMinusAbsorptionBertini.hh"
+
+- Added the declaration of theParticleIterator:
+
+	G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
+
+
+- Removed “G4AntiProtonAnnihilationAtRest.hh” (it wasn’t being used)
+
+- Each and every single model from G4FTFModel.hh needs to be added to an instance of G4TheoFSGenerator in order to then be registered using RegisterMe() (https://apc.u-paris.fr/~franco/g4doxy/html/classG4HadronicAbsorptionFritiof.html). Thus, #included the following files:
+
+	#include "G4TheoFSGenerator.hh"
+	#include "G4LundStringFragmentation.hh"
+	#include "G4ExcitedStringDecay.hh"
+	#include "G4PreCompoundModel.hh"
+	#include "G4GeneratorPrecompoundInterface.hh"
+
+
+And, changed the following code:
+
+	G4FTFModel* theHEInelasticModel = new G4FTFModel();
+	theInelasticProcess->RegisterMe(theHEInelasticModel);
+	pmanager->AddDiscreteProcess(theInelasticProcess);
+
+Into:
+
+	G4TheoFSGenerator * theHEInelasticModel = new G4TheoFSGenerator("FTFP");
+	G4FTFModel * theHEStringModel = new G4FTFModel();
+	G4LundStringFragmentation * theHELund = new G4LundStringFragmentation();
+	G4ExcitedStringDecay * theHEStringDecay = new G4ExcitedStringDecay(theHELund);
+	G4VPreCompoundModel * theHEDeExcitation = new G4PreCompoundModel();
+	G4GeneratorPrecompoundInterface * theHETransport = new G4GeneratorPrecompoundInterface(theHEDeExcitation);
+
+	theHEStringModel->SetFragmentationModel(theHEStringDecay);
+
+	theHEInelasticModel->SetHighEnergyGenerator(theHEStringModel);
+	theHEInelasticModel->SetTransport(theHETransport);
+
+	theInelasticProcess->RegisterMe(theHEInelasticModel);
+	pmanager->AddDiscreteProcess(theInelasticProcess);
+
+
+
+- #included "G4NeutronHPInelastic.hh"
+
+
+
+
+BGOHit.cc:
+
+- #included “G4SystemOfUnits.hh”
+
+
+
+
+Physics_EMPhysics.hh:
+
+- Replaced “G4MultipleScattering.hh” with “G4eMultipleScattering.hh”
+
+
+
+
+Physics_EMPhysics.cc:
+
+- Added the declaration of theParticleIterator:
+
+	G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
+
+
+
+
+
+GdCaptureGammas_glg4sim.cc:
+
+-  #included “G4PhysicalConstants.hh”
+
+
+
+
+DetectorConstruction.cc:
+
+- #included “G4SystemOfUnits.hh”
+
+- #included “G4PhysicalConstants.hh”
+
+
+
+
+GdCaptureGammas_ggarnet.cc:
+
+- #included "G4PhysicalConstants.hh"
+
+
+
+
+Physics_GeneralPhysics.cc:
+
+- Added the declaration of theParticleIterator:
+
+	G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
+
+
+
+
+
+Physics_RadioactiveDecayPhysics.cc:
+
+- Added the declaration of theParticleIterator:
+
+	G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
+
+
+
+
+
+Physics_PhysicsList.cc:
+
+- #included "G4SystemOfUnits.hh"
+
+
+
+
+GdNeutronHPCaptureFS.cc:
+
+- Replaced: 
+
+	theResult.Clear();
+
+With:
+
+	auto * theFinalState = theResult.Get();
+
+	if (!theFinalState) {
+		theResult.Put(new G4HadFinalState);
+		theFinalState = theResult.Get();
+		theFinalState->Clear();
+		cout << "theFinalState was null" << endl;
+	 }
+
+
+
+- Replaced:
+
+	theResult.AddSecondary(theOne);
+
+With:
+
+	theFinalState->AddSecondary(theOne);
+
+
+
+
+- Replaced:
+
+	theResult.AddSecondary(theTwo);
+
+With:
+
+	theFinalState->AddSecondary(theTwo);
+
+
+
+- Replaced: 
+
+	theResult.SetStatusChange(stopAndKill);
+
+With:
+
+	theFinalState->SetStatusChange(stopAndKill);
+
+
+
+- Replaced:
+
+	return &theResult;
+
+With: 
+
+	return theFinalState;
+
+
+
+- FindIon() (initially in G4ParticleTable) was moved to G4IonTable. Thus, #included:
+
+	#include “G4IonTable.hh”
+
+Wherever FindIon() is called, added:
+
+	G4ParticleTable* theTable1 = G4ParticleTable::GetParticleTable();
+
+	G4IonTable* tableOfIons1 = theTable1 ->GetIonTable();
+
+	…
+
+	tableOfIonsTemp1->FindIon(...)
+
+(In this case, I opted to use numbers and temps to differentiate between the different moments in which FindIon() is called)
+
+
+- Since the definition of m2 shadows the definition of meters squared in G4SystemOfUnits, renamed m1 and m2 to tempMass1 and tempMass2 in order to avoid  any shadowing and maintain the same naming scheme
+
+
+- Note: Even though the code shadows theNeutron, theTarget, and aNucleus (all from GdNeutronHPCaptureFS.hh, for some reason), it works fine
+
+
+These changes should allow ANNRI to work with GEANT4 version 10.1.3.
+
