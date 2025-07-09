@@ -22,7 +22,6 @@ source geant4make.sh
 ```
 - Define global variables in ./exe_ANNRI_BGO.cc
 - If desired, conditions on the output trees can be set in ./src/EventAction.cc
-
  
 
 ## Compile:
