@@ -64,6 +64,10 @@ Physics_EMPhysics::~Physics_EMPhysics()
 #include "G4NeutrinoE.hh"
 #include "G4AntiNeutrinoE.hh"
 
+
+// Juan David Cortes, June 27, 2025, might actually be necessary to declare this here for theParticleIterator to be properly defined
+#include "G4VPhysicsConstructor.hh"
+
 ////////////////////////////////////////////
 void Physics_EMPhysics::ConstructParticle()
 //////////////////////////////////////////
@@ -86,6 +90,9 @@ void Physics_EMPhysics::ConstructProcess()
 {
 
   bool omit_muon_processes = 0;
+
+  // Juan David Corte, June 27, 2025, This might be able to solve the issue with theParticleIterator (hopefully)
+  G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
 
   theParticleIterator->reset();
   while( (*theParticleIterator)() ){

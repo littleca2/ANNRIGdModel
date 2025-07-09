@@ -21,6 +21,9 @@
 #include <vector>
 #include "G4Gamma.hh"
 
+// Juan David Cortes, June 30, 2025, Because units are always necessary
+#include "G4PhysicalConstants.hh"
+
 #define File_name "GdCaptureGammas_ggarnet.cc"
 extern G4String Gd157_File; 
 extern G4String Gd155_File; 

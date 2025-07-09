@@ -50,6 +50,13 @@
 #include "G4RadioactiveDecayPhysics.hh"
 #include "G4DecayPhysics.hh"
 
+#include "G4SystemOfUnits.hh"
+
+//Juan David Cortes, July 2, 2025, I'm doing this to see if IonTable can finally get Gd
+#include "G4IonPhysics.hh"
+#include "G4IonTable.hh"
+#include "G4NuclideTable.hh"
+
 ///////////////////////////////////////////////////////////////////
 Physics_PhysicsList::Physics_PhysicsList():  G4VModularPhysicsList()
 ///////////////////////////////////////////////////////////////////
@@ -83,12 +90,37 @@ Physics_PhysicsList::Physics_PhysicsList():  G4VModularPhysicsList()
 	RegisterPhysics( new G4RadioactiveDecayPhysics("radioactive decay"));
 	RegisterPhysics( new G4DecayPhysics("decay"));
 
+	//Juan David Cortes, July 2, 2025, I'm doing this to see if IonTable can finally get Gd
+	RegisterPhysics(new G4IonPhysics()); 
+
 }
 
 ///////////////////////////////////////////////////////////////////
 Physics_PhysicsList::~Physics_PhysicsList()
 ///////////////////////////////////////////////////////////////////
 {
+}
+
+// Juan David Cortes, July 2, 2025, Override of ConstructParticle() in order to, hopefully, get the IonTables to have GD
+void Physics_PhysicsList::ConstructParticle()
+{
+
+	G4VModularPhysicsList::ConstructParticle();
+	G4GenericIon::GenericIonDefinition();
+	G4IonTable::GetIonTable()->CreateAllIon();
+
+	auto* nuclideTab = G4NuclideTable::GetNuclideTable();
+	nuclideTab->SetThresholdOfHalfLife(0.0);
+	nuclideTab->GenerateNuclide();
+	auto* ionTab = G4IonTable::GetIonTable();
+	size_t nIso = nuclideTab->entries();
+	for ( size_t i = 0; i < nIso; ++i ) {
+		auto* prop = nuclideTab->GetIsotopeByIndex(i);
+		ionTab->GetIon(prop->GetAtomicNumber(),
+				prop->GetAtomicMass(),
+				prop->GetIsomerLevel());
+	}
+
 }
 
 ///////////////////////////////////////////////////////////////////

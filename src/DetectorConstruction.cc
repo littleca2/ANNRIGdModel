@@ -23,6 +23,12 @@
 #include "G4String.hh"
 #include "G4SDManager.hh"
 
+// Juan David Cortes, June 27, 2025, this should solve the units issues
+#include "G4SystemOfUnits.hh"
+
+// Juan David Cortes, June 27, 2025, this should solve the STP_Temperature issue
+#include "G4PhysicalConstants.hh"
+
 #include "DetectorConstruction.hh"
 #include "CalorimeterSD.hh"
 #include "BGOSD.hh"

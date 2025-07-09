@@ -3,6 +3,7 @@
 //
 // ====================================================================
 #include "BGOHit.hh"
+#include "G4SystemOfUnits.hh"
 
 // allocator
 G4Allocator<BGOHit> BGOHitAllocator;
