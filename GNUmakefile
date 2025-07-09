@@ -21,12 +21,12 @@ EXTRALIBS =
 ifdef ROOTSYS
   ifeq ($(G4SYSTEM), Linux-g++)
     #  for Linux
-    CPPFLAGS += -g $(EXTRALIBS) -O2 -I$(shell $(ROOTSYS)/bin/root-config --incdir)
+    CPPFLAGS += -g -std=c++11 $(EXTRALIBS) -O2 -I$(shell $(ROOTSYS)/bin/root-config --incdir)
     #LDLIBS   += -g -Wl,-rpath,$(shell $(ROOTSYS)/bin/root-config --libdir) 
     LDLIBS   += -Wl,-rpath,$(shell $(ROOTSYS)/bin/root-config --libdir) \
                 $(shell $(ROOTSYS)/bin/root-config --libs)
   else
-    CPPFLAGS += -I$(shell $(ROOTSYS)/bin/root-config --incdir)
+    CPPFLAGS += -std=c++11 -I$(shell $(ROOTSYS)/bin/root-config --incdir)
     LDLIBS   += $(shell $(ROOTSYS)/bin/root-config --libs)
   endif
 endif
