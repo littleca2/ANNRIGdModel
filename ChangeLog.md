@@ -29,11 +29,6 @@ These changes should allow ANNRI to work with GEANT4 version 10.1.3. I have divi
 
 <br>
 <br>
-
-The Files (And, ultimately, the Notes)
-====
-
-<br>
 <br>
 
 
