@@ -11,6 +11,7 @@
 // Karim Zbiri, Aug, 2005
 ///////////////////////////////////////////////////////////////////////////////
 
+
 #include "GdNeutronHPCaptureFS.hh"
 #include "G4Gamma.hh"
 #include "G4ReactionProduct.hh"
@@ -40,7 +41,7 @@
 
 #include <cmath>
 int eventCount = 0;
-int totalEventNum = 200000000;
+int totalEventNum = 100;
 double percentProgress = 0.0;
 double eventsPerSecond = log(static_cast<double>(totalEventNum) / 1.1547) / 2.2163;
 double elapsedTime = 0.0;
