@@ -2,6 +2,7 @@ Change Log
 ====
 #### Juan David Cortés Echeverría
 
+<br>
 
 These changes should allow ANNRI to work with GEANT4 version 10.1.3. I have divided them by file in order to, hopefully, ensure a better legibility.
 
@@ -26,7 +27,11 @@ These changes should allow ANNRI to work with GEANT4 version 10.1.3. I have divi
 - [`GdNeutronHPCaptureFS.cc`](#gdneutroncapturehpcapturefscc)
 - [`Notes`](#notes)
 
+<br>
+<br>
 
+The Files (And, ultimately, the Notes)
+====
 
 <br>
 <br>
