@@ -1,12 +1,11 @@
-hange Log
+Change Log
+##### Juan David Cortes Echeverria
 =====
 
-### Juan David Cortes Echeverria
+I have divided the changes by file in order to, hopefully, ensure a better legibility   
 
-I have divided the changes by file in order to, hopefully, ensure a better legibility
-
-
-
+<br>
+<br>
 
 
 ## GNUmakefile:
@@ -14,6 +13,8 @@ I have divided the changes by file in order to, hopefully, ensure a better legib
 - Added `CPPFLAGS += -std=c++11` near the top
 
 
+<br>
+<br>
 
 
 ## Physics_MuonPhysics.hh:
@@ -21,6 +22,8 @@ I have divided the changes by file in order to, hopefully, ensure a better legib
 - Replaced `“G4MuonMinusCaptureAtRest.hh”` with `“G4MuonMinusCapture.hh”`
 
 
+<br>
+<br>
 
 
 ## Physics_HadronPhysics.cc:
@@ -47,7 +50,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 - Removed `“G4AntiProtonAnnihilationAtRest.hh”` (it wasn’t being used)
 
-- Each and every single model from `G4FTFModel.hh` needs to be added to an instance of `G4TheoFSGenerator` in order to then be registered using `RegisterMe()` [https://apc.u-paris.fr/~franco/g4doxy/html/classG4HadronicAbsorptionFritiof.html] (https://apc.u-paris.fr/~franco/g4doxy/html/classG4HadronicAbsorptionFritiof.html). Thus, #included the following files:
+- Each and every single model from `G4FTFModel.hh` needs to be added to an instance of `G4TheoFSGenerator` in order to then be registered using `RegisterMe()` (https://apc.u-paris.fr/~franco/g4doxy/html/classG4HadronicAbsorptionFritiof.html). Thus, #included the following files:
 
 ```bash
 #include "G4TheoFSGenerator.hh"
@@ -90,6 +93,8 @@ pmanager->AddDiscreteProcess(theInelasticProcess);
 - #included `"G4NeutronHPInelastic.hh"`
 
 
+<br>
+<br>
 
 
 ## BGOHit.cc:
@@ -97,12 +102,17 @@ pmanager->AddDiscreteProcess(theInelasticProcess);
 - #included `“G4SystemOfUnits.hh”`
 
 
+<br>
+<br>
 
 
 ## Physics_EMPhysics.hh:
 
 - Replaced `“G4MultipleScattering.hh”` with `“G4eMultipleScattering.hh”`
 
+
+<br>
+<br>
 
 
 ## Physics_EMPhysics.cc:
@@ -114,6 +124,8 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 ```
 
 
+<br>
+<br>
 
 
 
@@ -122,6 +134,8 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 -  #included `“G4PhysicalConstants.hh”`
 
 
+<br>
+<br>
 
 
 ## DetectorConstruction.cc:
@@ -132,6 +146,8 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 - #included `“G4PhysicalConstants.hh”`
 
 
+<br>
+<br>
 
 
 ## GdCaptureGammas_ggarnet.cc:
@@ -139,6 +155,8 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 - #included `"G4PhysicalConstants.hh"`
 
 
+<br>
+<br>
 
 
 ## Physics_GeneralPhysics.cc:
@@ -150,6 +168,8 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 ```
 
 
+<br>
+<br>
 
 
 
@@ -161,8 +181,8 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
 ```
 
-
-
+<br>
+<br>
 
 
 ## Physics_PhysicsList.cc:
@@ -170,6 +190,8 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 - #included `"G4SystemOfUnits.hh"`
 
 
+<br>
+<br>
 
 
 ## GdNeutronHPCaptureFS.cc:
@@ -195,58 +217,13 @@ if (!theFinalState) {
 
 
 
-- Replaced:
+- Replaced `theResult.AddSecondary(theOne);` with `theFinalState->AddSecondary(theOne);`
 
-```bash
-theResult.AddSecondary(theOne);
-```
+- Replaced `theResult.AddSecondary(theTwo);` with `theFinalState->AddSecondary(theTwo);`
 
-With:
+- Replaced `theResult.SetStatusChange(stopAndKill);` with `theFinalState->SetStatusChange(stopAndKill);`
 
-```bash
-theFinalState->AddSecondary(theOne);
-```
-
-
-
-- Replaced:
-
-```bash
-theResult.AddSecondary(theTwo);
-```
-
-With:
-
-```bash
-theFinalState->AddSecondary(theTwo);
-```
-
-
-- Replaced: 
-
-```bash
-theResult.SetStatusChange(stopAndKill);
-```
-
-With:
-
-```bash
-theFinalState->SetStatusChange(stopAndKill);
-```
-
-
-- Replaced:
-
-```bash
-return &theResult;
-```
-
-With: 
-
-```bash
-return theFinalState;
-```
-
+- Replaced `return &theResult;` with `return theFinalState;`
 
 - `FindIon()` (initially in `G4ParticleTable`) was moved to `G4IonTable`. Thus, #included:
 
@@ -273,6 +250,10 @@ G4IonTable* tableOfIons1 = theTable1 ->GetIonTable();
 
 
 - Note: Even though the code shadows theNeutron, theTarget, and aNucleus (all from `GdNeutronHPCaptureFS.hh`, for some reason), it works fine
+
+
+<br>
+<br>
 
 
 These changes should allow ANNRI to work with GEANT4 version 10.1.3.
