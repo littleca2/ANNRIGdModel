@@ -1,14 +1,39 @@
 Change Log
 ====
-##### Juan David Cortes Echeverria
+#### Juan David Cortés Echeverría
+##### University of Michigan, Ann Arbor, MI
+##### cortesjd@umich.edu 
 
-I have divided the changes by file in order to, hopefully, ensure a better legibility   
+
+These changes should allow ANNRI to work with GEANT4 version 10.1.3. I have divided them by file in order to, hopefully, ensure a better legibility.
+
+
+### Table of Contents
+
+[GNUmakefile] (#gnumakefile)
+[Physics_MuonPhysics.hh] (#physics_muonphysics.hh)
+[Physics_HadronPhysics.cc] (#physics_hadronphyiscs.cc)
+[BGOHit.cc] (#bgohit.cc)
+[Physics_EMPhysics.hh] (#physics_emphysics.hh)
+[Physics_EMPhysics.cc] (#physics_emphysics.cc)
+[GdCaptureGammas_glg4sim.cc] (#gdcapturegammas_glg4sim.cc)
+[DetectorConstruction.cc] (#detectorconstruction.cc)
+[GdCaptureGammas_ggarnet.cc] (#gdcapturegammas_ggarnet.cc)
+[Physics_GeneralPhysics.cc] (#physics_generalphysics.cc)
+[Physics_RadioactiveDecayPhysics.cc] (#physics_radioactivedecayphysics.cc)
+[Physics_PhysicsList.hh] (#physics_physicslist.hh)
+[Physics_PhysicsList.cc] (#physics_physicslist.cc)
+[RunAction.cc] (#runaction.cc)
+[GdNeutronHPCaptureFS.cc] (#gdneutroncapturehpcapturefs.cc)
+[Notes] (#notes)
+
+
 
 <br>
 <br>
 
 
-## GNUmakefile:
+## GNUmakefile
 
 Added `CPPFLAGS += -std=c++11` near the top
 
@@ -17,7 +42,7 @@ Added `CPPFLAGS += -std=c++11` near the top
 <br>
 
 
-## Physics_MuonPhysics.hh:
+## Physics_MuonPhysics.hh
 
 Replaced `“G4MuonMinusCaptureAtRest.hh”` with `“G4MuonMinusCapture.hh”`
 
@@ -26,7 +51,7 @@ Replaced `“G4MuonMinusCaptureAtRest.hh”` with `“G4MuonMinusCapture.hh”`
 <br>
 
 
-## Physics_HadronPhysics.cc:
+## Physics_HadronPhysics.cc
 
 - #included `"G4NeutronHPInelastic.hh"`
 
@@ -96,7 +121,7 @@ pmanager->AddDiscreteProcess(theInelasticProcess);
 <br>
 
 
-## BGOHit.cc:
+## BGOHit.cc
 
 #included `“G4SystemOfUnits.hh”`
 
@@ -105,7 +130,7 @@ pmanager->AddDiscreteProcess(theInelasticProcess);
 <br>
 
 
-## Physics_EMPhysics.hh:
+## Physics_EMPhysics.hh
 
 Replaced `“G4MultipleScattering.hh”` with `“G4eMultipleScattering.hh”`
 
@@ -114,7 +139,7 @@ Replaced `“G4MultipleScattering.hh”` with `“G4eMultipleScattering.hh”`
 <br>
 
 
-## Physics_EMPhysics.cc:
+## Physics_EMPhysics.cc
 
 Added the declaration of `theParticleIterator`:
 
@@ -128,7 +153,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 
 
-## GdCaptureGammas_glg4sim.cc:
+## GdCaptureGammas_glg4sim.cc
 
 #included `“G4PhysicalConstants.hh”`
 
@@ -137,7 +162,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 <br>
 
 
-## DetectorConstruction.cc:
+## DetectorConstruction.cc
 
 - #included `“G4SystemOfUnits.hh”` 
 
@@ -148,7 +173,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 <br>
 
 
-## GdCaptureGammas_ggarnet.cc:
+## GdCaptureGammas_ggarnet.cc
 
 #included `"G4PhysicalConstants.hh"`
 
@@ -157,7 +182,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 <br>
 
 
-## Physics_GeneralPhysics.cc:
+## Physics_GeneralPhysics.cc
 
 Added the declaration of `theParticleIterator`:
 
@@ -171,7 +196,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 
 
-## Physics_RadioactiveDecayPhysics.cc:
+## Physics_RadioactiveDecayPhysics.cc
 
 Added the declaration of `theParticleIterator`:
 
@@ -183,7 +208,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 <br>
 
 
-## Physics_PhysicsList.hh:
+## Physics_PhysicsList.hh
 
 In order to properly source the ions for each `IonTable`, added an override of the `ConstructParticle()` function:
 
@@ -195,7 +220,7 @@ virtual void ConstructParticle() override;
 <br>
 
 
-## Physics_PhysicsList.cc:
+## Physics_PhysicsList.cc
 
 - #included `"G4SystemOfUnits.hh"`
 
@@ -242,7 +267,7 @@ void Physics_PhysicsList::ConstructParticle()
 <br>
 <br>
 
-## RunAction.cc:
+## RunAction.cc
 
 To continue with the proper sourcing of the ions for each `IonTable`, #included `"G4IonTable.hh"` and created all the ions for the `IonTable` in `void RunAction::BeginOfRunAction(const G4Run*)`:
 
@@ -256,7 +281,7 @@ G4IonTable::GetIonTable()->CreateAllIon();
 
 
 
-## GdNeutronHPCaptureFS.cc:
+## GdNeutronHPCaptureFS.cc
 
 - Replaced `theResult.Clear();` with:
 
@@ -382,17 +407,21 @@ cout << "Current Progress: " << percentProgress << "%" << endl << endl << endl;
 ```
 
 
-
-*Note: Even though the code for `GdNeutronHPCaptureFS.cc` shadows theNeutron, theTarget, and aNucleus (all from `GdNeutronHPCaptureFS.hh`, for some reason), it works fine*
-
-
 <br>
 <br>
 
 
+## Notes
 
+- Even though the code for `GdNeutronHPCaptureFS.cc` shadows `theNeutron`, `theTarget`, and `aNucleus` (all from `GdNeutronHPCaptureFS.hh`, for some reason), it works fine.
 
-These changes should allow ANNRI to work with GEANT4 version 10.1.3.
+- The adjustments that ensure the proper sourcing of the ions for `IonTable` require the inclusion of specific paths to `G4ENSDFSTATE1.0` within your `~/.bashrc` file (more specifically, between where you source your `geant4.sh` and your `geant4make.sh`), like so:
 
+```bash
+source …/software/geant4-10.1.3-install/bin/geant4.sh
+export G4ENSDFSTATEDATA=".../software/geant4-10.1.3-install/share/Geant4-10.1.3/data/G4ENSDFSTATE1.0"
+export G4ENSDFSTATE_PATH=.../software/geant4-10.1.3-install/share/Geant4-10.1.3/data/G4ENSDFSTATE1.0
+source …/software/geant4-10.1.3-install/share/Geant4-10.1.3/geant4make/geant4make.sh
+```
 
 
