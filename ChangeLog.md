@@ -1,31 +1,30 @@
 Change Log
 ====
 #### Juan David Cortés Echeverría
-##### University of Michigan, Ann Arbor, MI
-##### cortesjd@umich.edu 
 
 
 These changes should allow ANNRI to work with GEANT4 version 10.1.3. I have divided them by file in order to, hopefully, ensure a better legibility.
 
+<br>
 
 ### Table of Contents
 
-[GNUmakefile] (#gnumakefile)
-[Physics_MuonPhysics.hh] (#physics_muonphysics.hh)
-[Physics_HadronPhysics.cc] (#physics_hadronphyiscs.cc)
-[BGOHit.cc] (#bgohit.cc)
-[Physics_EMPhysics.hh] (#physics_emphysics.hh)
-[Physics_EMPhysics.cc] (#physics_emphysics.cc)
-[GdCaptureGammas_glg4sim.cc] (#gdcapturegammas_glg4sim.cc)
-[DetectorConstruction.cc] (#detectorconstruction.cc)
-[GdCaptureGammas_ggarnet.cc] (#gdcapturegammas_ggarnet.cc)
-[Physics_GeneralPhysics.cc] (#physics_generalphysics.cc)
-[Physics_RadioactiveDecayPhysics.cc] (#physics_radioactivedecayphysics.cc)
-[Physics_PhysicsList.hh] (#physics_physicslist.hh)
-[Physics_PhysicsList.cc] (#physics_physicslist.cc)
-[RunAction.cc] (#runaction.cc)
-[GdNeutronHPCaptureFS.cc] (#gdneutroncapturehpcapturefs.cc)
-[Notes] (#notes)
+- [GNUmakefile] (#gnumakefile)
+- [Physics_MuonPhysics.hh] (#physics_muonphysicshh)
+- [Physics_HadronPhysics.cc] (#physics_hadronphyiscscc)
+- [BGOHit.cc] (#bgohitcc)
+- [Physics_EMPhysics.hh] (#physics_emphysicshh)
+- [Physics_EMPhysics.cc] (#physics_emphysicscc)
+- [GdCaptureGammas_glg4sim.cc] (#gdcapturegammas_glg4simcc)
+- [DetectorConstruction.cc] (#detectorconstructioncc)
+- [GdCaptureGammas_ggarnet.cc] (#gdcapturegammas_ggarnetcc)
+- [Physics_GeneralPhysics.cc] (#physics_generalphysicscc)
+- [Physics_RadioactiveDecayPhysics.cc] (#physics_radioactivedecayphysicscc)
+- [Physics_PhysicsList.hh] (#physics_physicslisthh)
+- [Physics_PhysicsList.cc] (#physics_physicslistcc)
+- [RunAction.cc] (#runactioncc)
+- [GdNeutronHPCaptureFS.cc] (#gdneutroncapturehpcapturefscc)
+- [Notes] (#notes)
 
 
 
