@@ -91,7 +91,7 @@ Physics_PhysicsList::Physics_PhysicsList():  G4VModularPhysicsList()
 	RegisterPhysics( new G4DecayPhysics("decay"));
 
 	//Juan David Cortes, July 2, 2025, I'm doing this to see if IonTable can finally get Gd
-	//RegisterPhysics(new G4IonPhysics()); 
+	RegisterPhysics(new G4IonPhysics()); 
 
 }
 

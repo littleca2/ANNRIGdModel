@@ -43,7 +43,7 @@
 int eventCount = 0;
 int totalEventNum = 100;
 double percentProgress = 0.0;
-double eventsPerSecond = log(static_cast<double>(totalEventNum) / 1.1547) / 2.2163;
+double eventsPerSecond = log(static_cast<double>(totalEventNum) / 1.1547) / 2.2163; // Assuming linearly completed neutron capture events and a logarithmic processing relation with the total number of events in the simulation
 double elapsedTime = 0.0;
 double totalTime = static_cast<double>(totalEventNum) / eventsPerSecond; // In Seconds 
 double remainingTime = totalTime; // Also in seconds
@@ -164,6 +164,18 @@ G4HadFinalState * GdNeutronHPCaptureFS::ApplyYourself(const G4HadProjectile & th
 	G4ParticleTable* theTable1 = G4ParticleTable::GetParticleTable();
 	G4IonTable* tableOfIons1 = theTable1->GetIonTable();
 	tableOfIons1->CreateAllIon();
+
+	// Juan David Cortes, July 10, 2025, I consider that this is necessary to properly initialize the IonTable
+	auto* nuclideTable1 = G4NuclideTable::GetNuclideTable();
+	nuclideTable1->SetThresholdOfHalfLife(0.0);
+	nuclideTable1->GenerateNuclide();
+	size_t nIso1 = nuclideTable1->entries();
+	for (size_t p = 0; p < nIso1; ++p) {
+		auto* prop = nuclideTable1->GetIsotopeByIndex(p);
+		tableOfIons1->GetIon(prop->GetAtomicNumber(), prop->GetAtomicMass(), prop->GetIsomerLevel());
+	}
+
+
 	//cout << "Number of Ions in tableOfIons1: " << tableOfIons1->Entries() << endl;
 	//theTwo->SetDefinition(tableOfIons1->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ)));
 
@@ -221,6 +233,21 @@ G4HadFinalState * GdNeutronHPCaptureFS::ApplyYourself(const G4HadProjectile & th
 		// G4ParticleDefinition * aRecoil = G4ParticleTable::GetParticleTable()->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ));
 		G4ParticleTable* theTable2 = G4ParticleTable::GetParticleTable();
 		G4IonTable* tableOfIons2 = theTable2->GetIonTable();
+
+		// Juan David Cortes, July 10, 2025, Doing this to get Gd on the IonTable
+		tableOfIons2->CreateAllIon();
+
+
+		// Juan David Cortes, July 10, 2025, I consider that this is necessary to properly initialize the IonTable
+		auto* nuclideTable2 = G4NuclideTable::GetNuclideTable();
+		nuclideTable2->SetThresholdOfHalfLife(0.0);
+		nuclideTable2->GenerateNuclide();
+		size_t nIso2 = nuclideTable2->entries();
+		for (size_t r = 0; r < nIso2; ++r) {
+			auto* prop = nuclideTable2->GetIsotopeByIndex(r);
+			tableOfIons2->GetIon(prop->GetAtomicNumber(), prop->GetAtomicMass(), prop->GetIsomerLevel());
+		}
+
 
 		//cout << "Number of Ions in tableOfIons2: " << tableOfIons2->Entries() << endl;
 		//G4ParticleDefinition * aRecoil = tableOfIons2->FindIon(static_cast<G4int>(theBaseZ), static_cast<G4int>(theBaseA+1), 0, static_cast<G4int>(theBaseZ));

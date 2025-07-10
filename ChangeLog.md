@@ -1,16 +1,16 @@
 Change Log
 ##### Juan David Cortes Echeverria
-=====
 
 I have divided the changes by file in order to, hopefully, ensure a better legibility   
 
+<br>
 <br>
 <br>
 
 
 ## GNUmakefile:
 
-- Added `CPPFLAGS += -std=c++11` near the top
+Added `CPPFLAGS += -std=c++11` near the top
 
 
 <br>
@@ -19,7 +19,7 @@ I have divided the changes by file in order to, hopefully, ensure a better legib
 
 ## Physics_MuonPhysics.hh:
 
-- Replaced `“G4MuonMinusCaptureAtRest.hh”` with `“G4MuonMinusCapture.hh”`
+Replaced `“G4MuonMinusCaptureAtRest.hh”` with `“G4MuonMinusCapture.hh”`
 
 
 <br>
@@ -27,6 +27,8 @@ I have divided the changes by file in order to, hopefully, ensure a better legib
 
 
 ## Physics_HadronPhysics.cc:
+
+- #included `"G4NeutronHPInelastic.hh"`
 
 - Replaced `“G4LElastic.hh”` with `“G4HadronElastic.hh”`
 
@@ -61,7 +63,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 ```
 
 
-And, changed the following code:
+and, changed the following code
 
 ```bash
 G4FTFModel* theHEInelasticModel = new G4FTFModel();
@@ -69,7 +71,7 @@ theInelasticProcess->RegisterMe(theHEInelasticModel);
 pmanager->AddDiscreteProcess(theInelasticProcess);
 ```
 
-Into:
+into:
 
 ```bash
 G4TheoFSGenerator * theHEInelasticModel = new G4TheoFSGenerator("FTFP");
@@ -90,16 +92,13 @@ pmanager->AddDiscreteProcess(theInelasticProcess);
 
 
 
-- #included `"G4NeutronHPInelastic.hh"`
-
-
 <br>
 <br>
 
 
 ## BGOHit.cc:
 
-- #included `“G4SystemOfUnits.hh”`
+#included `“G4SystemOfUnits.hh”`
 
 
 <br>
@@ -108,7 +107,7 @@ pmanager->AddDiscreteProcess(theInelasticProcess);
 
 ## Physics_EMPhysics.hh:
 
-- Replaced `“G4MultipleScattering.hh”` with `“G4eMultipleScattering.hh”`
+Replaced `“G4MultipleScattering.hh”` with `“G4eMultipleScattering.hh”`
 
 
 <br>
@@ -117,7 +116,7 @@ pmanager->AddDiscreteProcess(theInelasticProcess);
 
 ## Physics_EMPhysics.cc:
 
-- Added the declaration of `theParticleIterator`:
+Added the declaration of `theParticleIterator`:
 
 ```bash
 G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
@@ -131,7 +130,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 ## GdCaptureGammas_glg4sim.cc:
 
--  #included `“G4PhysicalConstants.hh”`
+#included `“G4PhysicalConstants.hh”`
 
 
 <br>
@@ -140,8 +139,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 ## DetectorConstruction.cc:
 
-- #included `“G4SystemOfUnits.hh”`
-
+- #included `“G4SystemOfUnits.hh”` 
 
 - #included `“G4PhysicalConstants.hh”`
 
@@ -152,7 +150,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 ## GdCaptureGammas_ggarnet.cc:
 
-- #included `"G4PhysicalConstants.hh"`
+#included `"G4PhysicalConstants.hh"`
 
 
 <br>
@@ -161,7 +159,7 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 ## Physics_GeneralPhysics.cc:
 
-- Added the declaration of `theParticleIterator`:
+Added the declaration of `theParticleIterator`:
 
 ```bash
 G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
@@ -175,10 +173,22 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 ## Physics_RadioactiveDecayPhysics.cc:
 
-- Added the declaration of `theParticleIterator`:
+Added the declaration of `theParticleIterator`:
 
 ```bash
 G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetIterator();
+```
+
+<br>
+<br>
+
+
+## Physics_PhysicsList.hh:
+
+In order to properly source the ions for each `IonTable`, added an override of the `ConstructParticle()` function:
+
+```bash
+virtual void ConstructParticle() override;
 ```
 
 <br>
@@ -189,20 +199,66 @@ G4ParticleTable::G4PTblDicIterator* theParticleIterator = theParticleTable->GetI
 
 - #included `"G4SystemOfUnits.hh"`
 
+- To continue with the proper sourcing of the ions for each `IonTable`, #included the following files:
+
+```bash
+#include "G4IonPhysics.hh"
+#include "G4IonTable.hh"
+#include "G4NuclideTable.hh"
+```
+
+registered a new instance of `G4IonPhysics` in `Physics_PhysicsList::Physics_PhysicsList():  G4VModularPhysicsList()`:
+
+```bash
+RegisterPhysics(new G4IonPhysics());
+```
+
+and overrode `ConstructParticle()`:
+
+```bash
+void Physics_PhysicsList::ConstructParticle()
+{
+
+        G4VModularPhysicsList::ConstructParticle();
+        G4GenericIon::GenericIonDefinition();
+        G4IonTable::GetIonTable()->CreateAllIon();
+
+        auto* nuclideTab = G4NuclideTable::GetNuclideTable();
+        nuclideTab->SetThresholdOfHalfLife(0.0);
+        nuclideTab->GenerateNuclide();
+        auto* ionTab = G4IonTable::GetIonTable();
+        size_t nIso = nuclideTab->entries();
+        for ( size_t i = 0; i < nIso; ++i ) {
+                auto* prop = nuclideTab->GetIsotopeByIndex(i);
+                ionTab->GetIon(prop->GetAtomicNumber(),
+                                prop->GetAtomicMass(),
+                                prop->GetIsomerLevel());
+        }
+
+}
+```
+
 
 <br>
 <br>
+
+## RunAction.cc:
+
+To continue with the proper sourcing of the ions for each `IonTable`, #included `"G4IonTable.hh"` and created all the ions for the `IonTable` in `void RunAction::BeginOfRunAction(const G4Run*)`:
+
+```bash
+G4IonTable::GetIonTable()->CreateAllIon();
+```
+
+
+<br>
+<br>
+
 
 
 ## GdNeutronHPCaptureFS.cc:
 
-- Replaced: 
-
-```bash
-theResult.Clear();
-```
-
-With:
+- Replaced `theResult.Clear();` with:
 
 ```bash
 auto * theFinalState = theResult.Get();
@@ -225,22 +281,34 @@ if (!theFinalState) {
 
 - Replaced `return &theResult;` with `return theFinalState;`
 
-- `FindIon()` (initially in `G4ParticleTable`) was moved to `G4IonTable`. Thus, #included:
+- To continue with the proper sourcing of the ions for each `IonTable`, it is necessary to use `CreateAllIon()` and a loop that retrieves particle information from a `nuclideTable`. Additionally, since `FindIon()` is ultimately used in each `IonTable` to find the Gd information, it is also necessary to properly include its new location (`FindIon()` was moved from `G4ParticleTable` to `G4IonTable`). Thus, #included the following files
 
 ```bash
 #include “G4IonTable.hh”
+#include "G4NuclideTable.hh"
 ```
 
-Wherever `FindIon()` is called, added:
+and, wherever `FindIon()` is called, added:
 
 ```bash
 G4ParticleTable* theTable1 = G4ParticleTable::GetParticleTable();
 
 G4IonTable* tableOfIons1 = theTable1 ->GetIonTable();
 
+tableOfIons1->CreateAllIon();
+
+auto* nuclideTable1 = G4NuclideTable::GetNuclideTable();
+nuclideTable1->SetThresholdOfHalfLife(0.0);
+nuclideTable1->GenerateNuclide();
+size_t nIso1 = nuclideTable1->entries();
+for (size_t p = 0; p < nIso1; ++p) {
+                auto* prop = nuclideTable1->GetIsotopeByIndex(p);
+                tableOfIons1->GetIon(prop->GetAtomicNumber(), prop->GetAtomicMass(), prop->GetIsomerLevel());
+}
+
 …
 
- tableOfIonsTemp1->FindIon(...)
+tableOfIonsTemp1->FindIon(...)
 ```
 
 (In this case, I opted to use numbers and temps to differentiate between the different moments in which `FindIon()` is called)
@@ -248,12 +316,80 @@ G4IonTable* tableOfIons1 = theTable1 ->GetIonTable();
 
 - Since the definition of `m2` shadows the definition of meters squared in `G4SystemOfUnits`, renamed `m1` and `m2` to `tempMass1` and `tempMass2` in order to avoid  any shadowing and maintain the same naming scheme
 
+- Changed `tempMass1 = tempIon1->GetPDGMass();` for:
 
-- Note: Even though the code shadows theNeutron, theTarget, and aNucleus (all from `GdNeutronHPCaptureFS.hh`, for some reason), it works fine
+```bash
+G4double tempMass1 = 0.0;
+
+if (!tempIon1) {
+cout << "tempIon1 is null" << endl;
+}
+
+tempMass1 = tempIon1->GetPDGMass();
+```
+
+- Added a “progress system” to give mc event by mc event updates about the progress of the simulation; first, including the necessary files and declaring the relevant variables
+
+```bash
+#include <cmath>
+int eventCount = 0;
+int totalEventNum = 100;
+double percentProgress = 0.0;
+double eventsPerSecond = log(static_cast<double>(totalEventNum) / 1.1547) / 2.2163; // Assuming linearly completed neutron capture events and a logarithmic processing relation with the total number of events in the simulation
+double elapsedTime = 0.0;
+double totalTime = static_cast<double>(totalEventNum) / eventsPerSecond; // In Seconds 
+double remainingTime = totalTime; // Also in seconds
+int daysElapsed = 0;
+int daysRemaining = 0;
+int hoursElapsed = 0;
+int hoursRemaining = 0;
+int minutesElapsed = 0;
+int minutesRemaining = 0;
+int secondsElapsed = 0;
+int secondsRemaining = 0;
+int numSecondsPerDay = 86400;
+int numSecondsPerHour = 3600;
+int numSecondsPerMinute = 60;
+```
+
+and, second, writing the necessary code just before returning in `G4HadFinalState * GdNeutronHPCaptureFS::ApplyYourself()`
+
+```bash
+// Just for the sake of knowing our current iteration
+eventCount = eventCount + 1;
+elapsedTime = static_cast<double>(eventCount) / eventsPerSecond;
+
+// This should legibly express elapsedTime in days, hours, minutes and seconds 
+daysElapsed = elapsedTime / numSecondsPerDay;
+hoursElapsed = (static_cast<int>(elapsedTime) % numSecondsPerDay) / numSecondsPerHour;
+minutesElapsed = (static_cast<int>(elapsedTime) % numSecondsPerHour) / numSecondsPerMinute;
+secondsElapsed = static_cast<int>(elapsedTime) % numSecondsPerMinute;
+
+remainingTime = totalTime - elapsedTime;
+
+// This should legibly express remainingTime in days, hours, minutes and seconds 
+daysRemaining = remainingTime / numSecondsPerDay;
+hoursRemaining = (static_cast<int>(remainingTime) % numSecondsPerDay) / numSecondsPerHour;
+minutesRemaining = (static_cast<int>(remainingTime) % numSecondsPerHour) / numSecondsPerMinute;
+secondsRemaining = static_cast<int>(remainingTime) % numSecondsPerMinute;
+
+
+percentProgress = (static_cast<double>(eventCount) / static_cast<double>(totalEventNum)) * 100.0;
+cout << "Event number " <<  eventCount << " of " << totalEventNum << endl;
+cout << "Estimated Elapsed time: " << daysElapsed << " days, " << hoursElapsed << " hours, " << minutesElapsed << " minutes, " << secondsElapsed <<  " seconds" << endl;
+cout << "Estimated Time Remaining: " << daysRemaining << " days, " << hoursRemaining << " hours, " << minutesRemaining << " minutes, " << secondsRemaining <<  " seconds" << endl;
+cout << "Current Progress: " << percentProgress << "%" << endl << endl << endl;
+```
+
+
+
+*Note: Even though the code for `GdNeutronHPCaptureFS.cc` shadows theNeutron, theTarget, and aNucleus (all from `GdNeutronHPCaptureFS.hh`, for some reason), it works fine*
 
 
 <br>
 <br>
+
+
 
 
 These changes should allow ANNRI to work with GEANT4 version 10.1.3.
