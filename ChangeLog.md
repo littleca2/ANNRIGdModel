@@ -1,9 +1,9 @@
 Change Log
+====
 ##### Juan David Cortes Echeverria
 
 I have divided the changes by file in order to, hopefully, ensure a better legibility   
 
-<br>
 <br>
 <br>
 

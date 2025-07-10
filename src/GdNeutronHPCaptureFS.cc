@@ -41,9 +41,9 @@
 
 #include <cmath>
 int eventCount = 0;
-int totalEventNum = 100;
+int totalEventNum = 7500;
 double percentProgress = 0.0;
-double eventsPerSecond = log(static_cast<double>(totalEventNum) / 1.1547) / 2.2163; // Assuming linearly completed neutron capture events and a logarithmic processing relation with the total number of events in the simulation
+double eventsPerSecond = log(static_cast<double>(totalEventNum) / 1.1547) * 1.5; // Assuming linearly completed neutron capture events and a logarithmic processing relation with the total number of events in the simulation
 double elapsedTime = 0.0;
 double totalTime = static_cast<double>(totalEventNum) / eventsPerSecond; // In Seconds 
 double remainingTime = totalTime; // Also in seconds

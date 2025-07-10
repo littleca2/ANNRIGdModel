@@ -841,3 +841,18 @@ Holder Position(x,y,z) : (0.000,0.000,0.000)
        End time        : Thu Jul 10 13:40:21 2025
      Running time      : 47.000sec 
 ================================================================================= 
+================================================================================= 
+     .....:::::;;;;;##### NewMC.root has been created #####;;;;;:::::.....     
+     Random seed       : 1988686609 
+      Start time       : Thu Jul 10 14:13:54 2025
+ 
+        VETO           : BGO veto detectors are working!! 
+Experiment (beam duct) : 2014B0124 (Al+LiF) 
+      Target           : Enrich 157Gd Target continuum  
+Target Position(x,y,z) : (1.700,0.000,0.000) 
+Holder Position(x,y,z) : (0.000,0.000,0.000) 
+ 
+   Incident Particle   :   G4GeneralParticleSource (GPS)  
+       End time        : Thu Jul 10 14:51:47 2025
+     Running time      : 2273.000sec 
+================================================================================= 
